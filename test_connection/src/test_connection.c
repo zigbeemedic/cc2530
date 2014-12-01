@@ -2,11 +2,23 @@
 
 /* PACKET_LENGTH must be < 128-4=124*/
 #define PACKET_LENGTH 100
-#define TIMEOUT 10000
+#define TIMEOUT 32767
 
 #define CSP_SFLUSHTX  0xDE
+#define CSP_ISFLUSHTX 0xEE
+#define CSP_ISFLUSHRX 0xED
 #define CSP_ISTXON    0xE9
+#define CSP_ISRXON    0xE3
 #define CSP_ISCLEAR   0xFF
+
+#define RFIRQF1_PINGRSP   (1 << 7) 
+#define RFIRQF1_TASKDONE  (1 << 6) 
+#define RFIRQF1_TXDONE    (1 << 5) 
+#define RFIRQF1_RXEMPTY   (1 << 4) 
+#define RFIRQF1_RXIGNORED (1 << 3) 
+#define RFIRQF1_RXNOK     (1 << 2) 
+#define RFIRQF1_TXFLUSHED (1 << 1) 
+#define RFIRQF1_RXOK      (1 << 0) 
 
 enum Error {
 	OK,
@@ -17,7 +29,6 @@ enum Error {
 void hal_cmd2rf(unsigned char cmd)
 {
 	RFST = cmd;
-	while(RFST != 0x0) {;}
 }
 
 void hal_led_blue(unsigned char on)
@@ -33,28 +44,34 @@ void hal_led_red(unsigned char on)
 void send_packet(void)
 {
 	unsigned char i;
-	hal_cmd2rf(CSP_SFLUSHTX);
+	hal_cmd2rf(CSP_ISFLUSHTX);
 	RFD = PACKET_LENGTH;
 	for(i = 0; i < PACKET_LENGTH; i++)
 		RFD = i; 
 	hal_cmd2rf(CSP_ISTXON);
 	/* wait TX fineshed */
-	while(!(RFIRQF1 & 0x20)) {;}
+	while(!(RFIRQF1 & 0x02)) {;}
+	RFIRQF1 = ~0x02;
 }
 
 enum Error recv_packet_timeout(void)
 {
-	int i;
+	volatile int i;
+/*
 	unsigned char length, len_i, data;
-	hal_cmd2rf(0xE3); //ISRXON
+*/
+	hal_cmd2rf(CSP_ISFLUSHRX);
+	hal_cmd2rf(CSP_ISRXON);
 	i = TIMEOUT;
 	while(1) {
-		if (RFIRQF1 & 0x40) // RXPKTDONE
+		if (RFIRQF0 & 0x40) {
+			RFIRQF0 = ~0x40;
 			break;
-		if (0 == i--) {
-			return ERR_TIMEOUT;
 		}
+		if (0 == i--)
+			return ERR_TIMEOUT;
 	}
+/*
 	length = RFD;
 	if (PACKET_LENGTH != length)
 		return ERR_DATA_CORRUPT;
@@ -63,6 +80,7 @@ enum Error recv_packet_timeout(void)
 		if(data != len_i)
 			return ERR_DATA_CORRUPT;
 	}
+*/
 	return OK;
 }
 
