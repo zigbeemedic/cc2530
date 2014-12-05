@@ -46,11 +46,11 @@ uint8 halLcdGetLineLength(void);
 uint8 halLcdGetNumLines(void);
 
 void halLcdWriteChar(uint8 line, uint8 col, char text);
-void halLcdWriteLine(uint8 line, const char XDATA *text);
-void halLcdWriteLines(const char XDATA *line1, const char XDATA *line2, const char XDATA *line3);
+void halLcdWriteLine(uint8 line, const char __xdata *text);
+void halLcdWriteLines(const char __xdata *line1, const char __xdata *line2, const char __xdata *line3);
 
 void halLcdClearAllSpecChars(void);
-void halLcdCreateSpecChar(uint8 index, const char XDATA *p5x8Spec);
+void halLcdCreateSpecChar(uint8 index, const char __xdata *p5x8Spec);
 void halLcdWriteSpecChar(uint8 line, uint8 col, uint8 index);
 
 void halLcd7SegWriteLine(const char *text);

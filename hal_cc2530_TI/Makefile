@@ -2,9 +2,6 @@ SOLUTION = hal_cc2530_TI
 
 CC_TOOL = /opt/cc-tools/bin/cc-tool
 
-SDCCCFLAGS += -D__ICC8051__
-SDCCCFLAGS += -D__IAR_SYSTEMS_ICC__
-SDCCCFLAGS += -D__TI_COMPILER_VERSION__
 SDCCCFLAGS += -Dchip=2530
 SDCCCFLAGS += -Itargets/interface
 SDCCCFLAGS += -Itargets/srf05_soc/

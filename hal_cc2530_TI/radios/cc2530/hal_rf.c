@@ -101,18 +101,18 @@
 #if INCLUDE_PA==2591
 static const menuItem_t pPowerSettings[] =
 {
-  "0dBm", HAL_RF_TXPOWER_0_DBM,
-  "13dBm", HAL_RF_TXPOWER_13_DBM,
-  "16dBm", HAL_RF_TXPOWER_16_DBM,
-  "18dBm", HAL_RF_TXPOWER_18_DBM,
-  "20dBm", HAL_RF_TXPOWER_20_DBM
+  {"0dBm", HAL_RF_TXPOWER_0_DBM},
+  {"13dBm", HAL_RF_TXPOWER_13_DBM},
+  {"16dBm", HAL_RF_TXPOWER_16_DBM},
+  {"18dBm", HAL_RF_TXPOWER_18_DBM},
+  {"20dBm", HAL_RF_TXPOWER_20_DBM}
 };
 #else
 static const menuItem_t pPowerSettings[] =
 {
-  "-3dBm", HAL_RF_TXPOWER_MIN_3_DBM,
-  "0dBm", HAL_RF_TXPOWER_0_DBM,
-  "4dBm", HAL_RF_TXPOWER_4_DBM
+  {"-3dBm", HAL_RF_TXPOWER_MIN_3_DBM},
+  {"0dBm", HAL_RF_TXPOWER_0_DBM},
+  {"4dBm", HAL_RF_TXPOWER_4_DBM}
 };
 #endif
 

@@ -275,7 +275,7 @@ void utilDisplayBarGraph(uint8 line, uint8 col, uint8 min, uint8 value)
  *
  * @return      none
  */
-void utilLcdDisplayValue(uint8 line, char XDATA *pLeft, int32 value, char XDATA *pRight)
+void utilLcdDisplayValue(uint8 line, char __xdata *pLeft, int32 value, char __xdata *pRight)
 {
     char *pValue;
     uint8 n;

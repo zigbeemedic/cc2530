@@ -32,7 +32,7 @@ void    utilPrintLogo(char* szAppName);
 void    utilPrintText(uint8* pTxt, uint8 n);
 void    utilLoadBarGraph(void);
 void    utilDisplayBarGraph(uint8 line, uint8 col, uint8 min, uint8 value);
-void    utilLcdDisplayValue(uint8 line, char XDATA *pLeft, int32 value, char XDATA *pRight);
+void    utilLcdDisplayValue(uint8 line, char __xdata *pLeft, int32 value, char __xdata *pRight);
 void    utilLcdDisplayCounters(uint8 line, int32 lValue, char lChar, int32 rValue, char rChar);
 void    utilLcdDisplayUint16(uint8 line, uint8 radix, uint16 value);
 

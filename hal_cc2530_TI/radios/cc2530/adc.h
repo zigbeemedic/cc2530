@@ -18,7 +18,7 @@
 
 // Include chip specific IO definition file
 #if (chip == 2530 || chip == 2531)
-#include <ioCC2530.h>
+#include <cc2530.h>
 #endif
 
 
@@ -81,8 +81,8 @@
 #define ADC_SAMPLE_READY()      st( ADCCON1 & 0x80; )
 
 // Macro for setting/clearing a channel as input of the ADC
-#define ADC_ENABLE_CHANNEL(ch)   ADCCFG |=  (0x01 << ch)
-#define ADC_DISABLE_CHANNEL(ch)  ADCCFG &= ~(0x01 << ch)
+#define ADC_ENABLE_CHANNEL(ch)   APCFG |=  (0x01 << ch)
+#define ADC_DISABLE_CHANNEL(ch)  APCFG &= ~(0x01 << ch)
 
 
 // Macros for configuring the ADC input:

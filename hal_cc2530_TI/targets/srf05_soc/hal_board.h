@@ -10,19 +10,19 @@
 #define HAL_BOARD_H
 
 #if (chip==2430)
-#include "ioCC2430.h"
+#include "cc2430.h"
 #elif (chip==2431)
-#include "ioCC2431.h"
+#include "cc2431.h"
 #elif (chip==2530 || chip==2531)
-#include "ioCC2530.h"
+#include "cc2530.h"
 #elif (chip==2510)
-#include "ioCC2510.h"
+#include "cc2510.h"
 #elif (chip==2511)
-#include "ioCC2511.h"
+#include "cc2511.h"
 #elif (chip==1110)
-#include "ioCC1110.h"
+#include "cc1110.h"
 #elif (chip==1111)
-#include "ioCC1111.h"
+#include "cc1111.h"
 #else
 #error "Chip not supported!"
 #endif

@@ -137,6 +137,21 @@ typedef unsigned short istate_t;
 
 typedef unsigned short istate_t;
 
+/*****************************************************
+ * SDCC
+ */
+
+#elif defined       __SDCC
+#define NOP()       __asm__("NOP")
+#define XREG(addr)  ((unsigned char volatile __xdata *) 0)[addr]
+#define PXREG(addr) ((unsigned char volatile __xdata *) addr)
+
+#define HAL_ISR_FUNC_DECLARATION(f,v) \
+	void f(void) __interrupt v
+#define HAL_ISR_FUNC_PROTOTYPE(f,v)   \
+	void f(void) __interrupt v
+#define HAL_ISR_FUNCTION(f,v)         \
+	HAL_ISR_FUNC_PROTOTYPE(f,v); HAL_ISR_FUNC_DECLARATION(f,v)
 
 /*****************************************************
  * Other compilers

@@ -45,10 +45,14 @@
 #define HAL_RF_GAIN_HIGH                    1
 
 // IEEE 802.15.4 defined constants (2.4 GHz logical channels)
-#define MIN_CHANNEL 				        11    // 2405 MHz
+#define MIN_CHANNEL                         11    // 2405 MHz
 #define MAX_CHANNEL                         26    // 2480 MHz
 #define CHANNEL_SPACING                     5     // MHz
 
+#define SHORT_ADDR0                         XREG( 0x6174 )
+#define SHORT_ADDR1                         XREG( 0x6175 )
+#define PAN_ID0                             XREG( 0x6172 )
+#define PAN_ID1                             XREG( 0x6173 )
 
 /***********************************************************************************
 * GLOBAL FUNCTIONS
