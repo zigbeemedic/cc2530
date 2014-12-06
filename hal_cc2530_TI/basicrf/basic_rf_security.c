@@ -6,7 +6,8 @@
 
 ***********************************************************************************/
 
-#ifdef SECURITY_CCM
+#ifndef __BASIC_RF_SECURITY__
+#define __BASIC_RF_SECURITY__
 
 /***********************************************************************************
 * INCLUDES
@@ -27,8 +28,6 @@
 static uint8 nonceTx[NONCE_SIZE];
 static uint8 nonceRx[NONCE_SIZE];
 
-
-
 /***********************************************************************************
 * GLOBAL FUNCTIONS
 */
@@ -45,6 +44,8 @@ static uint8 nonceRx[NONCE_SIZE];
 */
 void basicRfSecurityInit(basicRfCfg_t* pConfig)
 {
+#ifdef SECURITY_CCM
+
     uint8 i;
 
     // Initialise nonce bytes to 0
@@ -67,6 +68,7 @@ void basicRfSecurityInit(basicRfCfg_t* pConfig)
     nonceTx[13] = SECURITY_CONTROL;
 
     halRfSecurityInit(pConfig->securityKey, nonceRx, nonceTx);
+#endif
 }
 
 /***********************************************************************************
@@ -86,7 +88,7 @@ void basicRfSecurityInit(basicRfCfg_t* pConfig)
   its documentation for any purpose.
 
   YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
-  PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+  PROVIDED ï¿½AS ISï¿½ WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
   INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
   NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
   TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,

@@ -17,12 +17,12 @@ SRC_RADIOS = $(wildcard radios/cc2530/*.c)
 SRC_UTILS = $(wildcard utils/*.c)
 
 SRC = $(SRC_COMMON) $(SRC_BASICRF) $(SRC_RADIOS) $(SRC_UTILS)
-OBJ = $(patsubst %.c, %.o, $(SRC))
+OBJ = $(patsubst %.c, %.rel, $(SRC))
 
 all: $(OBJ)
-	echo $^
+	sdcc-sdcclib $(SOLUTION).lib *.rel
 
-%.o: %.c
+%.rel: %.c
 	sdcc-sdcc -c $(SDCCCFLAGS) $<
 
 clean:
@@ -36,4 +36,4 @@ clean:
 	-rm -rf *.rst
 	-rm -rf *.sym  
 	-rm -rf *.hex
-
+	-rm -rf *.lib
