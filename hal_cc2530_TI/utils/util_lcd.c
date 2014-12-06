@@ -31,10 +31,10 @@
 // For SRF05EB only
 #define SRF05EB
 
-static const char symbol1[8] = {0x03, 0x07, 0x0E, 0x0E, 0x1C, 0x19, 0x1B, 0x1B};
-static const char symbol2[8] = {0x1B, 0x1B, 0x19, 0x1C, 0x0E, 0x0E, 0x07, 0x03};
-static const char symbol3[8] = {0x18, 0x1E, 0x07, 0x03, 0x18, 0x1C, 0x06, 0x00};
-static const char symbol4[8] = {0x00, 0x06, 0x1C, 0x18, 0x03, 0x07, 0x1E, 0x18};
+static const char  symbol1[8] = {0x03, 0x07, 0x0E, 0x0E, 0x1C, 0x19, 0x1B, 0x1B};
+static const char  symbol2[8] = {0x1B, 0x1B, 0x19, 0x1C, 0x0E, 0x0E, 0x07, 0x03};
+static const char  symbol3[8] = {0x18, 0x1E, 0x07, 0x03, 0x18, 0x1C, 0x06, 0x00};
+static const char  symbol4[8] = {0x00, 0x06, 0x1C, 0x18, 0x03, 0x07, 0x1E, 0x18};
 
 const char ppBarGraphChar[8][8] = {
     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1F },
@@ -104,14 +104,14 @@ uint8 utilMenuSelect(const menu_t* pMenu)
             // Display the updated value and arrows
             #ifdef SRF04EB
              // Make space for left arrow at left end of display
-            strncpy(&(pLcdLine2[1]), (char*)pMenu->pMenuItems[index].szDescr, halLcdGetLineLength()-2);
+            strncpy(&(pLcdLine2[1]), (char *)pMenu->pMenuItems[index].szDescr, halLcdGetLineLength()-2);
             halLcdWriteLine(HAL_LCD_LINE_2, pLcdLine2);
             halLcdWriteChar(HAL_LCD_LINE_2, 0, '<');
             halLcdWriteChar(HAL_LCD_LINE_2, halLcdGetLineLength()-1, '>');
             #elif defined(ASSY_EXP4618_CC2420)
-            halLcdWriteLine7Seg((char*)pMenu->pMenuItems[index].szDescr);
+            halLcdWriteLine7Seg((char *)pMenu->pMenuItems[index].szDescr);
             #else
-            halLcdWriteLine(HAL_LCD_LINE_2, (char*)pMenu->pMenuItems[index].szDescr);
+            halLcdWriteLine(HAL_LCD_LINE_2, (char *)pMenu->pMenuItems[index].szDescr);
             halLcdWriteChar(HAL_LCD_LINE_3, 0, '<');
             halLcdWriteChar(HAL_LCD_LINE_3, halLcdGetLineLength()-1, '>');
             #endif
@@ -275,7 +275,7 @@ void utilDisplayBarGraph(uint8 line, uint8 col, uint8 min, uint8 value)
  *
  * @return      none
  */
-void utilLcdDisplayValue(uint8 line, char __xdata *pLeft, int32 value, char __xdata *pRight)
+void utilLcdDisplayValue(uint8 line, char  *pLeft, int32 value, char  *pRight)
 {
     char *pValue;
     uint8 n;
@@ -406,7 +406,7 @@ void utilPrintText(uint8* pTxt, uint8 n) { }
   its documentation for any purpose.
 
   YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
-  PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+  PROVIDED ï¿½AS ISï¿½ WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
   INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
   NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
   TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,

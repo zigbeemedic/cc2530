@@ -46,11 +46,11 @@ uint8 halLcdGetLineLength(void);
 uint8 halLcdGetNumLines(void);
 
 void halLcdWriteChar(uint8 line, uint8 col, char text);
-void halLcdWriteLine(uint8 line, const char __xdata *text);
-void halLcdWriteLines(const char __xdata *line1, const char __xdata *line2, const char __xdata *line3);
+void halLcdWriteLine(uint8 line, const char  *text);
+void halLcdWriteLines(const char  *line1, const char  *line2, const char  *line3);
 
 void halLcdClearAllSpecChars(void);
-void halLcdCreateSpecChar(uint8 index, const char __xdata *p5x8Spec);
+void halLcdCreateSpecChar(uint8 index, const char  *p5x8Spec);
 void halLcdWriteSpecChar(uint8 line, uint8 col, uint8 index);
 
 void halLcd7SegWriteLine(const char *text);
@@ -81,7 +81,7 @@ void halLcd7SegWriteValue(uint16 value, uint8 radix);
   its documentation for any purpose.
 
   YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
-  PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+  PROVIDED ï¿½AS ISï¿½ WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
   INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
   NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
   TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,
