@@ -11,3 +11,5 @@
 *.rst
 *.sym  
 *.hex
+
+*.iml
