@@ -10,21 +10,22 @@ enum Error {
 void putchar(char c)
 {
 	U0DBUF = c;
-	while(!UTX0IF) {;}
+	while(U0CSR & 0x01) {__asm__("NOP");}
 }
 
 void init()
 {
 	U0CSR |= 0x80;
-	P0SEL |= 0x0C;
-	U0GCR = 8;   /* BAUD_E */
-	U0BAUD = 59; /* BAUD_M */
+	U0GCR |= 11;   /* BAUD_E */
+	U0BAUD |= 216; /* BAUD_M */
+	P0SEL |= 0x3C;
+	CLKCONCMD = 0;
 }
 
 void main(void) {
 	init();
 	while(1) {
-		printf("Hello World!\n");
+		printf("Hello, World!\n\r");
 	}
 }
 
