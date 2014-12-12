@@ -4,6 +4,10 @@ CC_TOOL = /opt/cc-tools/bin/cc-tool
 
 SRC = $(wildcard src/*.c)
 
+SDCCCFLAGS += -I../hal_cc2530/
+SDCCCFLAGS += -L../hal_cc2530/
+SDCCCFLAGS += hal_cc2530.lib
+
 $(SOLUTION).hex: $(SRC)
 	sdcc-sdcc $(SDCCCFLAGS) $<
 	sdcc-packihx $(SOLUTION).ihx > $(SOLUTION).hex

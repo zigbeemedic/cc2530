@@ -4,21 +4,6 @@
 #define PACKET_LENGTH 100
 #define TIMEOUT 32767
 
-#define CSP_SFLUSHTX  0xDE
-#define CSP_ISFLUSHTX 0xEE
-#define CSP_ISFLUSHRX 0xED
-#define CSP_ISTXON    0xE9
-#define CSP_ISRXON    0xE3
-#define CSP_ISCLEAR   0xFF
-
-#define RFIRQF1_PINGRSP   (1 << 7) 
-#define RFIRQF1_TASKDONE  (1 << 6) 
-#define RFIRQF1_TXDONE    (1 << 5) 
-#define RFIRQF1_RXEMPTY   (1 << 4) 
-#define RFIRQF1_RXIGNORED (1 << 3) 
-#define RFIRQF1_RXNOK     (1 << 2) 
-#define RFIRQF1_TXFLUSHED (1 << 1) 
-#define RFIRQF1_RXOK      (1 << 0) 
 
 enum Error {
 	OK,
