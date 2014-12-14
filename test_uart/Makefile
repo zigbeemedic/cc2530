@@ -2,7 +2,7 @@ SOLUTION = test_uart
 
 CC_TOOL = /opt/cc-tools/bin/cc-tool
 
-SRC = $(wildcard src/*.c)
+SRC = $(wildcard *.c)
 
 SDCCCFLAGS += -I../hal_cc2530/
 SDCCCFLAGS += -L../hal_cc2530/

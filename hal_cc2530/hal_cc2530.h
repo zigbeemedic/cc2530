@@ -19,6 +19,10 @@
 #define RFIRQF1_TXFLUSHED (1 << 1)
 #define RFIRQF1_RXOK      (1 << 0)
 
+#define AUTO_ACK  (1 << 5)
+#define AUTO_CRC  (1 << 6)
+#define RXMODE(val) (val << 2)
+
 void hal_init(void);
 void hal_cmd2rf(unsigned char cmd);
 void hal_led_blue(unsigned char on);

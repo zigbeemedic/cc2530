@@ -1,12 +1,8 @@
-SOLUTION = test_connection
+SOLUTION = someradio
 
 CC_TOOL = /opt/cc-tools/bin/cc-tool
 
 SRC = $(wildcard *.c)
-
-SDCCCFLAGS += -I../hal_cc2530/
-SDCCCFLAGS += -L../hal_cc2530/
-SDCCCFLAGS += hal_cc2530.lib
 
 $(SOLUTION).hex: $(SRC)
 	sdcc-sdcc $(SDCCCFLAGS) $<
