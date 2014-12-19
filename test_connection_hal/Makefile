@@ -10,7 +10,7 @@ SDCCCFLAGS += -I../hal_cc2530_TI/common
 SDCCCFLAGS += -I../hal_cc2530_TI/common/cc8051
 SDCCCFLAGS += -I../hal_cc2530_TI/radios/cc2530
 SDCCCFLAGS += -I../hal_cc2530_TI/utils
-SDCCCFLAGS += -L ../hal_cc2530_TI/
+SDCCCFLAGS += -L../hal_cc2530_TI/
 
 SRC = $(wildcard src/*.c)
 
