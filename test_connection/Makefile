@@ -1,4 +1,5 @@
 SOLUTION = test_connection
+TARGET = SEND
 
 CC_TOOL = /opt/cc-tools/bin/cc-tool
 
@@ -7,6 +8,7 @@ SRC = $(wildcard *.c)
 SDCCCFLAGS += -I../hal_cc2530/
 SDCCCFLAGS += -L../hal_cc2530/
 SDCCCFLAGS += hal_cc2530.lib
+SDCCCFLAGS += -D$(TARGET)
 
 $(SOLUTION).hex: $(SRC)
 	sdcc-sdcc $(SDCCCFLAGS) $<

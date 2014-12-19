@@ -13,3 +13,5 @@
 *.hex
 
 *.iml
+*.lib
+*.sym

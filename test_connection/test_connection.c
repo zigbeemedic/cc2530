@@ -35,7 +35,7 @@ void recv_packet_irs(void) __interrupt(RF_VECTOR)
 {
 	volatile char data;
 	printf("YRA RFIRQF0 = 0x%X RFIRQF1=0x%X\n\r", RFIRQF0, RFIRQF1);
-	data = RXD;
+	data = RFD;
 }
 
 enum Error recv_packet_timeout(void)
@@ -68,7 +68,9 @@ void show_status(void)
 }
 
 void main(void) {
-//	enum Error err;
+#ifdef RECV
+	enum Error err;
+#endif
 
 	hal_init();
 	RFIRQM0 = 0x60;
@@ -78,11 +80,16 @@ void main(void) {
 	hal_cmd2rf(CSP_ISRXON);
 	FRMFILT0 = 0x0C;
 	while(1) {
-//		show_status();
-//		hal_led_blue(1);
-//		send_packet();
-//		hal_led_blue(0);
-//		err = recv_packet_timeout();
-//		hal_led_red(OK != err);
+		show_status();
+#ifdef SEND
+		hal_led_blue(1);
+		send_packet();
+		hal_led_blue(0);
+#endif		
+#ifdef RECV
+		err = recv_packet_timeout();
+		hal_led_red(OK != err);
+#endif
 	}
 }
+
