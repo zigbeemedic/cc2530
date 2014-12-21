@@ -35,6 +35,7 @@ void recv_packet_irs(void) __interrupt(RF_VECTOR)
 {
 	volatile char data;
 	printf("YRA RFIRQF0 = 0x%X RFIRQF1=0x%X\n\r", RFIRQF0, RFIRQF1);
+	printf("RSSI = %X RSSISTAT = %X\n\r", RSSI, RSSISTAT);
 	data = RFD;
 }
 
@@ -73,12 +74,24 @@ void main(void) {
 #endif
 
 	hal_init();
-	RFIRQM0 = 0x60;
+	RFIRQM0 = 0xFF; //0x60;
 	IEN2 = 0x01;
 	EA = 1;
+	SHORTADDRH = 0;
+#ifdef SEND
+	SHORTADDRL = 1;
+#else
+	SHORTADDRL = 2;
+#endif
+	PANIDH = 0;
+	PANIDL = 1;
+
+#ifdef RECV
+	RXENABLE = 0xFF;
 	hal_cmd2rf(CSP_ISFLUSHRX);
 	hal_cmd2rf(CSP_ISRXON);
 	FRMFILT0 = 0x0C;
+#endif
 	while(1) {
 		show_status();
 #ifdef SEND
