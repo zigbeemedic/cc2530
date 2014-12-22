@@ -9,7 +9,7 @@ enum Error {
 	ERR_DATA_CORRUPT
 };
 
-basicRfCfg_t cfg;
+static basicRfCfg_t cfg;
 uint8 packet_payload[PACKET_LENGTH];
 
 void init(void)
@@ -29,6 +29,11 @@ void bsp_led_blue(unsigned char on)
 void bsp_led_red(unsigned char on)
 {
 	P1_1 = !on;
+}
+
+void halAssertHandler(void)
+{
+	bsp_led_red(1);
 }
 
 void send_ping(void)

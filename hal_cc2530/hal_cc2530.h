@@ -3,12 +3,13 @@
 
 #include <mcs51/cc2530.h>
 
-#define CSP_SFLUSHTX  0xDE
-#define CSP_ISFLUSHTX 0xEE
-#define CSP_ISFLUSHRX 0xED
-#define CSP_ISTXON    0xE9
-#define CSP_ISRXON    0xE3
-#define CSP_ISCLEAR   0xFF
+#define CSP_SFLUSHTX    0xDE
+#define CSP_ISFLUSHTX   0xEE
+#define CSP_ISFLUSHRX   0xED
+#define CSP_ISTXON      0xE9
+#define CSP_ISRXON      0xE3
+#define CSP_ISSAMPLECCA 0xEB
+#define CSP_ISCLEAR     0xFF
 
 #define RFIRQF1_PINGRSP   (1 << 7)
 #define RFIRQF1_TASKDONE  (1 << 6)

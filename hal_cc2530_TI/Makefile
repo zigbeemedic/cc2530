@@ -10,6 +10,7 @@ SDCCCFLAGS += -Icommon
 SDCCCFLAGS += -Icommon/cc8051
 SDCCCFLAGS += -Iradios/cc2530
 SDCCCFLAGS += -Iutils
+SDCCCFLAGS += --model-large
 
 SRC_COMMON = $(wildcard common/*.c)
 SRC_BASICRF = $(wildcard basicrf/*.c)

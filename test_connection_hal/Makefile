@@ -11,8 +11,9 @@ SDCCCFLAGS += -I../hal_cc2530_TI/common/cc8051
 SDCCCFLAGS += -I../hal_cc2530_TI/radios/cc2530
 SDCCCFLAGS += -I../hal_cc2530_TI/utils
 SDCCCFLAGS += -L../hal_cc2530_TI/
+SDCCCFLAGS += --model-large
 
-SRC = $(wildcard src/*.c)
+SRC = $(wildcard *.c)
 
 $(SOLUTION).hex: $(SRC)
 	sdcc-sdcc $(SDCCCFLAGS) hal_cc2530_TI.lib $<
