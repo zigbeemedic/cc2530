@@ -443,7 +443,7 @@ uint8 basicRfSendPacket(uint16 destAddr, uint8* pPayload, uint8 length)
 
     // Send frame with CCA. return FAILED if not successful
     if(halRfTransmit() != SUCCESS) {
-        status = FAILED;
+        status = 31;// FAILED;
     }
 
     // Wait for the acknowledge to be received, if any
@@ -455,7 +455,7 @@ uint8 basicRfSendPacket(uint16 destAddr, uint8* pPayload, uint8 length)
         halMcuWaitUs((12 * BASIC_RF_SYMBOL_DURATION) + (BASIC_RF_ACK_DURATION) + (2 * BASIC_RF_SYMBOL_DURATION) + 10);
 
         // If an acknowledgment has been received (by RxFrmDoneIsr), the ackReceived flag should be set
-        status = txState.ackReceived ? SUCCESS : FAILED;
+        status = txState.ackReceived ? SUCCESS : 32; //FAILED;
 
     } else {
         status = SUCCESS;

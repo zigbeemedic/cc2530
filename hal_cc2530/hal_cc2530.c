@@ -1,5 +1,9 @@
 #include "hal_cc2530.h"
 
+static uint8 txMpdu[128];
+static uint8 rxMpdu[128];
+
+
 static void hal_init_rf(void)
 {
         // 23.15.1 Recommended RX settings 
@@ -26,7 +30,7 @@ void hal_init(void)
 	hal_led_red(0);
 	hal_led_blue(0);
 
-	hal_init_rf(void);
+	hal_init_rf();
 }
 
 void putchar(char c)
@@ -50,5 +54,31 @@ void hal_led_red(unsigned char on)
 	P1_1 = !on;
 }
 
+void halRfReceiveOn()
+{
+	hal_cmd2rf(CSP_ISFLUSHRX);
+	hal_cmd2rf(CSP_ISRXON);
+}
+
+void halRfWaitTransceiverReady(void)
+{
+	// Wait for SFD not active and TX_Active not active
+	while (FSMSTAT1 & (BV(1) | BV(5))) {
+		__asm__("NOP");
+	}
+}
+
+static uint8 basicRfBuildMpdu(uint16 destAddr, uint8* pPayload, uint8 payloadLength)
+{
+	uint8 hdrLength, n;
+
+	hdrLength = basicRfBuildHeader(txMpdu, destAddr, payloadLength);
+
+	for(n=0;n<payloadLength;n++)
+	{
+		txMpdu[hdrLength+n] = pPayload[n];
+	}
+	return hdrLength + payloadLength; // total mpdu length
+}
 
 

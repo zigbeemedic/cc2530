@@ -20,6 +20,9 @@ void show_status(void)
 void send_packet(void)
 {
 	unsigned char i;
+	halRfReceiveOn();
+	halRfWaitTransceiverReady();
+
 	hal_cmd2rf(CSP_ISFLUSHTX);
 	RFD = PACKET_LENGTH;
 	for(i = 0; i < PACKET_LENGTH; i++)

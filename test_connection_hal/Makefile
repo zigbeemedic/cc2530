@@ -1,4 +1,6 @@
 SOLUTION = test_connection_hal
+SELF = 2
+TARGET = 1
 
 CC_TOOL = /opt/cc-tools/bin/cc-tool
 
@@ -12,6 +14,7 @@ SDCCCFLAGS += -I../hal_cc2530_TI/radios/cc2530
 SDCCCFLAGS += -I../hal_cc2530_TI/utils
 SDCCCFLAGS += -L../hal_cc2530_TI/
 SDCCCFLAGS += --model-large
+SDCCCFLAGS += -DSELF=$(SELF) -DTARGET=$(TARGET)
 
 SRC = $(wildcard *.c)
 
@@ -21,6 +24,9 @@ $(SOLUTION).hex: $(SRC)
 
 burn: $(SOLUTION).hex
 	sudo $(CC_TOOL) -e -w $^ -v
+	sudo $(CC_TOOL) --reset
+
+reset:
 	sudo $(CC_TOOL) --reset
 
 sim: $(SOLUTION).hex
