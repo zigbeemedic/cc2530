@@ -3,6 +3,10 @@
 
 #include <mcs51/cc2530.h>
 
+// #define CC2530_RF_LOW_POWER_RX
+
+#define CSP_CMD(x) while(0) {RFST = x;}
+
 #define CSP_SFLUSHTX    0xDE
 #define CSP_ISFLUSHTX   0xEE
 #define CSP_ISFLUSHRX   0xED
@@ -20,9 +24,18 @@
 #define RFIRQF1_TXFLUSHED (1 << 1)
 #define RFIRQF1_RXOK      (1 << 0)
 
-#define AUTO_ACK  (1 << 5)
-#define AUTO_CRC  (1 << 6)
-#define RXMODE(val) (val << 2)
+#define BV(n) (1 << (n))
+
+#define CC2530_RF_CHANNEL_MIN     11
+#define CC2530_RF_CHANNEL_MAX     26
+#define CC2530_RF_CHANNEL_SPACING 5
+
+
+#define RF_TURN_ON_TIME   192 /*us*/
+
+enum HalError {
+	OK,
+};
 
 void hal_init(void);
 void hal_cmd2rf(unsigned char cmd);
