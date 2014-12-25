@@ -15,7 +15,25 @@
 #define CC2530_RF_CCA_THRES CC2530_RF_CONF_CCA_THRES
 #else
 #define CC2530_RF_CCA_THRES CCA_THRES_USER_GUIDE /* User guide recommendation */
-#endif /* CC2530_RF_CONF_CCA_THRES */
+#endif
+
+static enum Hal_RfState rf_state = RFSTATE_OFF;
+
+static void Hal_Rf_On(void)
+{
+	if(RFSTATE_ON_RX == rf_state)
+		return;
+	CSP_CMD(ISFLUSHRX);
+	CSP_CMD(ISRXON);
+	rf_state = RFSTATE_ON_RX;
+}
+
+static void Hal_Rf_Off(void)
+{
+	CSP_CMD(ISRFOFF);
+	CSP_CMD(ISFLUSHRX);
+	rf_state = RFSTATE_OFF;
+}
 
 void Hal_Rf_Init(uint8_t channel, uint16_t pan_id, uint16_t self_addr)
 {
@@ -61,6 +79,7 @@ void Hal_Rf_RecvOn()
 {
 	CSP_CMD(CSP_ISFLUSHRX);
 	CSP_CMD(CSP_ISRXON);
+	rf_state = RFSTATE_ON_RX;
 }
 
 void Hal_Rf_WaitTXReady(void)
@@ -74,10 +93,10 @@ void Hal_Rf_WaitTXReady(void)
 void Hal_Rf_SetChannel(uint8_t channel)
 {
 	/* Changes to FREQCTRL take effect after the next recalibration */
-	cc2530_Rf_Off();
+	Hal_Rf_Off();
 	FREQCTRL = (CC2530_RF_CHANNEL_MIN + 
 		(channel - CC2530_RF_CHANNEL_MIN) * CC2530_RF_CHANNEL_SPACING);
-	cc2530_Rf_On();
+	Hal_Rf_On();
 }
 
 void Hal_Rf_SetPower(uint8_t power)
@@ -105,8 +124,8 @@ static void prepare(const void *payload, unsigned short payload_len)
 	 */
 	while(FSMSTAT1 & FSMSTAT1_TX_ACTIVE);
 	
-	if((rf_flags & RX_ACTIVE) == 0) {
-		on();
+	if(RFSTATE_ON_TX == rf_state) {
+		Hal_Rf_On();
 	}
 	
 	CSP_CMD(ISFLUSHTX);
@@ -122,7 +141,7 @@ static void prepare(const void *payload, unsigned short payload_len)
 	RFD = 0;
 }
 
-static HalError transmit(unsigned short transmit_len)
+static enum HalError transmit(unsigned short transmit_len)
 {
 	uint8_t counter;
 	enum HalError ret = TX_ERROR;
@@ -146,30 +165,30 @@ static HalError transmit(unsigned short transmit_len)
 	
 	counter = 0;
 	while(!(FSMSTAT1 & FSMSTAT1_TX_ACTIVE) && (counter++ < 3)) {
-		__asm__("NOP"); /* we can use time for sleeping - usec(6); */
+		Hal_CLock_WaitUs(6);
 	}
 	
 	if(!(FSMSTAT1 & FSMSTAT1_TX_ACTIVE)) {
 		CC2530_CSP_ISFLUSHTX();
-		ret = TX_NEVER_ACTIVE; /* RF: TX never active */
+		ret = TX_NEVER_ACTIVE;
 	} else {
 		/* Wait for the transmission to finish */
 		while(FSMSTAT1 & FSMSTAT1_TX_ACTIVE);
 		ret = OK;
 	}
 	
-	off(); /* TODO: we need the flag - should we turn off transmitter? */
+	Hal_Rf_Off(); /* TODO: we need the flag - should we turn off transmitter? */
 	
 	return ret;
 }
 
-enum HalError cc2530_Rf_Send(void *payload, unsigned short payload_len)
+enum HalError Hal_Rf_Send(void *payload, unsigned short payload_len)
 {
 	prepare(payload, payload_len);
 	return transmit(payload_len);
 }
 
-int cc2530_Rf_Read(void *buf, unsigned short bufsize)
+enum HalError Hal_Rf_Read(void *buf, unsigned short bufsize)
 {
 	uint8_t i;
 	uint8_t len;
@@ -182,24 +201,18 @@ int cc2530_Rf_Read(void *buf, unsigned short bufsize)
 	/* Check for validity */
 	if(len > CC2530_RF_MAX_PACKET_LEN) {
 		/* Oops, we must be out of sync. */
-		PUTSTRING("RF: bad sync\n");
-	
-		RIMESTATS_ADD(badsynch);
 		CC2530_CSP_ISFLUSHRX();
-		CC2530_ERR_RX_PACKET_TOO_BIG;
+		return RX_PACKET_TOO_BIG;
 	}
 	
 	if(len <= CC2530_RF_MIN_PACKET_LEN) {
-		RIMESTATS_ADD(tooshort);
 		CC2530_CSP_ISFLUSHRX();
-		return 0;
+		return RX_PACKET_TOO_SMALL;
 	}
 	
 	if(len - CHECKSUM_LEN > bufsize) {
-		PUTSTRING("RF: too long\n");
-		RIMESTATS_ADD(toolong);
 		CC2530_CSP_ISFLUSHRX();
-		return 0;
+		return RX_BUF_TOO_SMALL;
 	}
 	
 	len -= CHECKSUM_LEN;
@@ -232,9 +245,9 @@ int cc2530_Rf_Read(void *buf, unsigned short bufsize)
 		 * Only flush if the FIFO is actually empty. If not, then next pass we will
 		 * pick up one more packet or flush due to an error.
 		 */
-		  if(!RXFIFOCNT) {
+		if(!RXFIFOCNT) {
 			CC2530_CSP_ISFLUSHRX();
-		  }
+		}
 	}
 	
 	return len;
@@ -259,28 +272,5 @@ static int receiving_packet(void)
 static int pending_packet(void)
 {
 	return (FSMSTAT1 & FSMSTAT1_FIFOP);
-}
-
-static int cc2530_Rf_On(void)
-{
-	if(!(rf_flags & RX_ACTIVE)) {
-		CC2530_CSP_ISFLUSHRX();
-		CC2530_CSP_ISRXON();
-		rf_flags |= RX_ACTIVE;
-	}
-	
-	ENERGEST_ON(ENERGEST_TYPE_LISTEN);
-	return 1;
-}
-
-static int cc2530_Rf_Off(void)
-{
-	CC2530_CSP_ISRFOFF();
-	CC2530_CSP_ISFLUSHRX();
-
-	rf_flags &= ~RX_ACTIVE;
-
-	ENERGEST_OFF(ENERGEST_TYPE_LISTEN);
-	return 1;
 }
 

@@ -26,20 +26,27 @@
 
 #define BV(n) (1 << (n))
 
-#define CC2530_RF_CHANNEL_MIN     11
-#define CC2530_RF_CHANNEL_MAX     26
-#define CC2530_RF_CHANNEL_SPACING 5
+#define CC2530_RF_CHANNEL_MIN      11
+#define CC2530_RF_CHANNEL_MAX      26
+#define CC2530_RF_CHANNEL_SPACING  5
 
 
 #define RF_TURN_ON_TIME   192 /*us*/
 
 enum HalError {
 	OK,
+	TX_CH_NOT_CLEAR,
+	TX_SFD_NOW,
+	TX_NEVER_ACTIVE
 };
 
-void hal_init(void);
-void hal_cmd2rf(unsigned char cmd);
-void hal_led_blue(unsigned char on);
-void hal_led_red(unsigned char on);
+enum Hal_RfState {
+	RFSTATE_OFF,
+	RFSTATE_ON_TX,
+	RFSTATE_ON_RX
+};
+
+void Hal_Rf_Init(uint8_t channel, uint16_t pan_id, uint16_t self_addr)
+enum HalError Hal_Rf_Send(void *payload, unsigned short payload_len)
 
 #endif
