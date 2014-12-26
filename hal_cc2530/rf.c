@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "hal_cc2530.h"
 
 #define CCA_THRES_USER_GUIDE          0xF8
@@ -105,6 +106,8 @@ void Hal_Rf_Init(uint8_t channel, uint16_t pan_id, uint16_t self_addr)
 	Hal_Rf_SetAddr(pan_id, self_addr);
 
 	CSP_CMD(ISCLEAR);
+
+	Hal_Rf_On();
 }
 
 void Hal_Rf_RecvOn()
@@ -200,15 +203,24 @@ enum HalError Hal_Rf_Send(void *payload, unsigned short payload_len)
 	return transmit(payload_len);
 }
 
-enum HalError Hal_Rf_Read(void *buf, unsigned short bufsize)
+enum HalError Hal_Rf_Read(void *buf, unsigned short bufsize, uint8_t *received)
 {
 	uint8_t i;
 	uint8_t len;
 	uint8_t crc_corr;
 	int8_t rssi;
 	
+	*received = 0;
+
+	if(rf_state != RFSTATE_ON_RX)
+		Hal_Rf_On();
+
+	while(!(FSMSTAT1 & FSMSTAT1_FIFO))
+		__asm__("NOP");
+
 	/* Check the length */
 	len = RFD;
+	printf("len = %d\n\r", len);
 	
 	/* Check for validity */
 	if(len > CC2530_RF_MAX_PACKET_LEN) {
@@ -243,7 +255,7 @@ enum HalError Hal_Rf_Read(void *buf, unsigned short bufsize)
 		// packetbuf_set_attr(PACKETBUF_ATTR_LINK_QUALITY, crc_corr & LQI_BIT_MASK);
 	} else {
 		CSP_CMD(ISFLUSHRX);
-		return 0;
+		*received = 0;
 	}
 	
 	/* If FIFOP==1 and FIFO==0 then we had a FIFO overflow at some point. */
@@ -260,7 +272,8 @@ enum HalError Hal_Rf_Read(void *buf, unsigned short bufsize)
 		}
 	}
 	
-	return len;
+	*received = len;
+	return OK;
 }
 
 static int receiving_packet(void)

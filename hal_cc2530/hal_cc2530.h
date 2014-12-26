@@ -69,6 +69,7 @@ void Hal_Rf_SetPower(uint8_t power);
 void Hal_Rf_SetChannel(uint8_t channel);
 void Hal_Rf_SetAddr(uint16_t pan_id, uint16_t self_addr);
 enum HalError Hal_Rf_Send(void *payload, unsigned short payload_len);
+enum HalError Hal_Rf_Read(void *buf, unsigned short bufsize, uint8_t *received);
 
 void Hal_UART_Init(void);
 
