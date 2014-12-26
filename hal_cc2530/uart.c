@@ -1,6 +1,6 @@
-#include "cc2530_hal.h"
+#include "hal_cc2530.h"
 
-void cc2530_UART_Init(void)
+void Hal_UART_Init(void)
 {
 	U0CSR |= 0x80;
 	/* set 115200 */

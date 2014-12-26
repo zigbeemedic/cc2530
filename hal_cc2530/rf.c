@@ -7,6 +7,7 @@
 
 #define CC2530_RF_MAX_PACKET_LEN      127
 #define CC2530_RF_MIN_PACKET_LEN        4
+#define CHECKSUM_LEN 2
 
 #define CC2530_RF_CCA_CLEAR             1
 #define CC2530_RF_CCA_BUSY              0
@@ -16,6 +17,14 @@
 #else
 #define CC2530_RF_CCA_THRES CCA_THRES_USER_GUIDE /* User guide recommendation */
 #endif
+
+#define CC2530_RF_TX_POWER  0xD5
+
+/* Bit Masks for the last byte in the RX FIFO */
+#define CRC_BIT_MASK 0x80
+#define LQI_BIT_MASK 0x7F
+/* RSSI Offset */
+#define RSSI_OFFSET    73
 
 static enum Hal_RfState rf_state = RFSTATE_OFF;
 
@@ -33,6 +42,30 @@ static void Hal_Rf_Off(void)
 	CSP_CMD(ISRFOFF);
 	CSP_CMD(ISFLUSHRX);
 	rf_state = RFSTATE_OFF;
+}
+
+void Hal_Rf_SetPower(uint8_t power)
+{
+	/* TODO: need a conversion from human readable units to register value */
+	TXPOWER = power;
+}
+
+void Hal_Rf_SetChannel(uint8_t channel)
+{
+	/* Changes to FREQCTRL take effect after the next recalibration */
+	Hal_Rf_Off();
+	FREQCTRL = (CC2530_RF_CHANNEL_MIN + 
+		(channel - CC2530_RF_CHANNEL_MIN) * CC2530_RF_CHANNEL_SPACING);
+	Hal_Rf_On();
+}
+
+void Hal_Rf_SetAddr(uint16_t pan_id, uint16_t self_addr)
+{
+	PANIDL = pan_id & 0xFF;
+	PANIDH = pan_id >> 8;
+
+	SHORTADDRL = self_addr & 0xFF;
+	SHORTADDRH = self_addr >> 8;
 }
 
 void Hal_Rf_Init(uint8_t channel, uint16_t pan_id, uint16_t self_addr)
@@ -58,10 +91,9 @@ void Hal_Rf_Init(uint8_t channel, uint16_t pan_id, uint16_t self_addr)
 	FSCAL1 = 0x00;    /* Reduce the VCO leakage */
 
 	/* Auto ACKs and CRC calculation, default RX and TX modes with FIFOs */
-	FRMCTRL0 = FRMCTRL0_AUTOCRC;
-#if CC2530_RF_AUTOACK
-	FRMCTRL0 |= FRMCTRL0_AUTOACK;
-#endif
+	FRMCTRL0 |= BV(6); // FRMCTRL0_AUTOCRC
+	FRMCTRL0 |= BV(5); // FRMCTRL0_AUTOACK
+
 	/* Disable source address matching and autopend */
 	SRCMATCH = 0; /* TODO: investigate */
 	
@@ -72,13 +104,13 @@ void Hal_Rf_Init(uint8_t channel, uint16_t pan_id, uint16_t self_addr)
 	Hal_Rf_SetChannel(channel);
 	Hal_Rf_SetAddr(pan_id, self_addr);
 
-	CSP_CMD(CSP_ISCLEAR);
+	CSP_CMD(ISCLEAR);
 }
 
 void Hal_Rf_RecvOn()
 {
-	CSP_CMD(CSP_ISFLUSHRX);
-	CSP_CMD(CSP_ISRXON);
+	CSP_CMD(ISFLUSHRX);
+	CSP_CMD(ISRXON);
 	rf_state = RFSTATE_ON_RX;
 }
 
@@ -88,30 +120,6 @@ void Hal_Rf_WaitTXReady(void)
 	while (FSMSTAT1 & (BV(1) | BV(5))) {
 		__asm__("NOP");
 	}
-}
-
-void Hal_Rf_SetChannel(uint8_t channel)
-{
-	/* Changes to FREQCTRL take effect after the next recalibration */
-	Hal_Rf_Off();
-	FREQCTRL = (CC2530_RF_CHANNEL_MIN + 
-		(channel - CC2530_RF_CHANNEL_MIN) * CC2530_RF_CHANNEL_SPACING);
-	Hal_Rf_On();
-}
-
-void Hal_Rf_SetPower(uint8_t power)
-{
-	/* TODO: need a conversion from human readable units to register value */
-	TXPOWER = power;
-}
-
-void Hal_Rf_SetAddr(uint16_t pan_id, uint16_t self_addr)
-{
-	PAN_ID0 = pan_id & 0xFF;
-	PAN_ID1 = pan_id >> 8;
-
-	SHORT_ADDR0 = self_addr & 0xFF;
-	SHORT_ADDR1 = self_addr >> 8;
 }
 
 static void prepare(const void *payload, unsigned short payload_len)
@@ -141,11 +149,15 @@ static void prepare(const void *payload, unsigned short payload_len)
 	RFD = 0;
 }
 
+static int is_channel_clear(void)
+{
+	return !(FSMSTAT1 & FSMSTAT1_CCA);
+}
+
 static enum HalError transmit(unsigned short transmit_len)
 {
 	uint8_t counter;
 	enum HalError ret = TX_ERROR;
-	rtimer_clock_t t0;
 	transmit_len; /* hush the warning */
 	
 	Hal_CLock_WaitUs(RF_TURN_ON_TIME); 
@@ -169,7 +181,7 @@ static enum HalError transmit(unsigned short transmit_len)
 	}
 	
 	if(!(FSMSTAT1 & FSMSTAT1_TX_ACTIVE)) {
-		CC2530_CSP_ISFLUSHTX();
+		CSP_CMD(ISFLUSHTX);
 		ret = TX_NEVER_ACTIVE;
 	} else {
 		/* Wait for the transmission to finish */
@@ -201,17 +213,17 @@ enum HalError Hal_Rf_Read(void *buf, unsigned short bufsize)
 	/* Check for validity */
 	if(len > CC2530_RF_MAX_PACKET_LEN) {
 		/* Oops, we must be out of sync. */
-		CC2530_CSP_ISFLUSHRX();
+		CSP_CMD(ISFLUSHRX);
 		return RX_PACKET_TOO_BIG;
 	}
 	
 	if(len <= CC2530_RF_MIN_PACKET_LEN) {
-		CC2530_CSP_ISFLUSHRX();
+		CSP_CMD(ISFLUSHRX);
 		return RX_PACKET_TOO_SMALL;
 	}
 	
 	if(len - CHECKSUM_LEN > bufsize) {
-		CC2530_CSP_ISFLUSHRX();
+		CSP_CMD(ISFLUSHRX);
 		return RX_BUF_TOO_SMALL;
 	}
 	
@@ -226,13 +238,11 @@ enum HalError Hal_Rf_Read(void *buf, unsigned short bufsize)
 
 	/* MS bit CRC OK/Not OK, 7 LS Bits, Correlation value */
 	if(crc_corr & CRC_BIT_MASK) {
-		packetbuf_set_attr(PACKETBUF_ATTR_RSSI, rssi);
-		packetbuf_set_attr(PACKETBUF_ATTR_LINK_QUALITY, crc_corr & LQI_BIT_MASK);
-		RIMESTATS_ADD(llrx);
+		// TODO: implement it
+		// packetbuf_set_attr(PACKETBUF_ATTR_RSSI, rssi);
+		// packetbuf_set_attr(PACKETBUF_ATTR_LINK_QUALITY, crc_corr & LQI_BIT_MASK);
 	} else {
-		RIMESTATS_ADD(badcrc);
-		CC2530_CSP_ISFLUSHRX();
-		RF_RX_LED_OFF();
+		CSP_CMD(ISFLUSHRX);
 		return 0;
 	}
 	
@@ -246,16 +256,11 @@ enum HalError Hal_Rf_Read(void *buf, unsigned short bufsize)
 		 * pick up one more packet or flush due to an error.
 		 */
 		if(!RXFIFOCNT) {
-			CC2530_CSP_ISFLUSHRX();
+			CSP_CMD(ISFLUSHRX);
 		}
 	}
 	
 	return len;
-}
-
-static int is_channel_clear(void)
-{
-	return !(FSMSTAT1 & FSMSTAT1_CCA);
 }
 
 static int receiving_packet(void)
