@@ -125,18 +125,27 @@ void Hal_Rf_WaitTXReady(void)
 	}
 }
 
-static void prepare(const void *payload, unsigned short payload_len)
+static int is_channel_clear(void)
 {
+	return !(FSMSTAT1 & FSMSTAT1_CCA);
+}
+
+enum HalError Hal_Rf_Send(void *payload, unsigned short payload_len)
+{
+	uint8_t counter;
+	enum HalError ret = TX_ERROR;
 	uint8_t i;
 	
 	/*
 	 * When we transmit in very quick bursts, make sure previous transmission
 	 * is not still in progress before re-writing to the TX FIFO
 	 */
-	while(FSMSTAT1 & FSMSTAT1_TX_ACTIVE);
+	while(FSMSTAT1 & FSMSTAT1_TX_ACTIVE)
+		__asm__("NOP");
 	
 	if(RFSTATE_ON_TX == rf_state) {
 		Hal_Rf_On();
+		Hal_CLock_WaitUs(RF_TURN_ON_TIME); 
 	}
 	
 	CSP_CMD(ISFLUSHTX);
@@ -150,24 +159,9 @@ static void prepare(const void *payload, unsigned short payload_len)
 	/* Leave space for the FCS */
 	RFD = 0;
 	RFD = 0;
-}
 
-static int is_channel_clear(void)
-{
-	return !(FSMSTAT1 & FSMSTAT1_CCA);
-}
-
-static enum HalError transmit(unsigned short transmit_len)
-{
-	uint8_t counter;
-	enum HalError ret = TX_ERROR;
-	transmit_len; /* hush the warning */
-	
-	Hal_CLock_WaitUs(RF_TURN_ON_TIME); 
-	
-	if(!is_channel_clear()) {
-		return TX_CH_NOT_CLEAR;
-	}
+	while(!is_channel_clear())
+		__asm__("NOP");
 	
 	/* prepare() double checked that TX_ACTIVE is low. If SFD is high we are
 	 * receiving. Abort transmission and bail out with RADIO_TX_COLLISION */
@@ -195,12 +189,6 @@ static enum HalError transmit(unsigned short transmit_len)
 	Hal_Rf_Off(); /* TODO: we need the flag - should we turn off transmitter? */
 	
 	return ret;
-}
-
-enum HalError Hal_Rf_Send(void *payload, unsigned short payload_len)
-{
-	prepare(payload, payload_len);
-	return transmit(payload_len);
 }
 
 enum HalError Hal_Rf_Read(void *buf, unsigned short bufsize, uint8_t *received)

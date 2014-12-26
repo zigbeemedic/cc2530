@@ -43,7 +43,7 @@ void show_status(void)
 
 void init(void)
 {
-	Hal_Init(1, 1, SELF_ADDR);
+	Hal_Init(24, 1, SELF_ADDR);
 
 	// RFIRQM0 = 0xFF; //0x60;
 	// IEN2 = 0x01;
